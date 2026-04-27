@@ -1,0 +1,32 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { Layout } from './components/Layout'
+import { Dashboard } from './pages/Dashboard'
+import { PlanPage } from './pages/PlanPage'
+import { VideosPage } from './pages/Videos'
+import { PesoPage } from './pages/Peso'
+import { DietaPage } from './pages/Dieta'
+import { AjustesPage } from './pages/Ajustes'
+
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <Layout />,
+      children: [
+        { index: true, element: <Dashboard /> },
+        { path: 'plan', element: <PlanPage /> },
+        { path: 'videos', element: <VideosPage /> },
+        { path: 'peso', element: <PesoPage /> },
+        { path: 'dieta', element: <DietaPage /> },
+        { path: 'ajustes', element: <AjustesPage /> },
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL.replace(/\/$/, '') },
+)
+
+function App() {
+  return <RouterProvider router={router} />
+}
+
+export default App
