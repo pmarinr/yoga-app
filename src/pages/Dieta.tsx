@@ -164,6 +164,28 @@ export function DietaPage() {
                           )}
                         </div>
                         <div className="flex flex-col gap-1">
+                          {(slot === 'comida' || slot === 'cena') && (
+                            <>
+                              <a
+                                href={`https://www.google.com/search?udm=50&q=${encodeURIComponent('receta ' + cell.text)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                title="Buscar receta en Google AI"
+                              >
+                                🔍
+                              </a>
+                              <a
+                                href={`https://www.youtube.com/results?search_query=${encodeURIComponent('receta ' + cell.text)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs px-2 py-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100"
+                                title="Buscar receta en YouTube"
+                              >
+                                ▶️
+                              </a>
+                            </>
+                          )}
                           <button
                             onClick={() => swapMeal(dow, slot)}
                             className="text-xs px-2 py-1 rounded bg-slate-100 hover:bg-slate-200"
@@ -207,7 +229,7 @@ export function DietaPage() {
       </section>
 
       <p className="text-xs text-slate-400 text-center">
-        🔄 cambia por otro plato de la <strong>misma categoría</strong> (mantiene equilibrio) · ↺ vuelve a la sugerencia · toca el texto para editar.
+        🔍 Google AI · ▶️ YouTube · 🔄 otra opción · ↺ vuelve a la sugerencia · toca el texto para editar.
       </p>
     </div>
   )
