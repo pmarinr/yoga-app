@@ -6,6 +6,7 @@ const links = [
   { to: '/videos', label: 'Vídeos', icon: '▶️' },
   { to: '/peso', label: 'Peso', icon: '⚖️' },
   { to: '/dieta', label: 'Dieta', icon: '🥗' },
+  { to: '/guia', label: 'Guía', icon: '📖' },
   { to: '/ajustes', label: 'Ajustes', icon: '⚙️' },
 ]
 
@@ -42,7 +43,7 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-6">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-7">
         {links.map((l) => (
           <NavLink
             key={l.to}
