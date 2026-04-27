@@ -2,6 +2,7 @@ import { PLAN, PHASE_LABEL, SESSION_LABEL, DOW_LABEL } from '../data/plan'
 import { videoById } from '../data/videos'
 import { useSessions } from '../hooks/useSessions'
 import { VideoEmbed } from './VideoEmbed'
+import { fireConfetti } from './Confetti'
 
 interface Props {
   week: number
@@ -49,8 +50,12 @@ export function DayModal({ week, dow, onClose }: Props) {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => toggle(week, dow)}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              onClick={() => {
+                const wasDone = log?.done
+                toggle(week, dow)
+                if (!wasDone) fireConfetti({ particleCount: 80 })
+              }}
+              className={`px-4 py-2 rounded-lg font-medium transition-transform active:scale-95 ${
                 log?.done ? 'bg-teal-500 text-white' : 'bg-slate-100 text-slate-700'
               }`}
             >

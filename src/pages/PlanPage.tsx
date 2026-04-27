@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { WeekGrid } from '../components/WeekGrid'
 import { DayModal } from '../components/DayModal'
+import { HeatMap } from '../components/HeatMap'
 import { useStartDate } from '../hooks/useStartDate'
 import { PHASE_LABEL, PLAN } from '../data/plan'
 
@@ -15,6 +16,11 @@ export function PlanPage() {
         <h1 className="text-2xl font-semibold">Plan 12 semanas</h1>
         <p className="text-sm text-slate-500">Toca un día para ver el vídeo y marcarlo como hecho.</p>
       </header>
+
+      <section className="rounded-2xl bg-white p-4 shadow-sm">
+        <h2 className="font-semibold mb-3 text-sm">Consistencia</h2>
+        <HeatMap />
+      </section>
 
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <WeekGrid onSelect={(w, d) => setSel({ week: w, dow: d })} highlight={today} />

@@ -1,10 +1,17 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { clearAll, exportBackup, importBackup } from '../lib/backup'
 import { useStartDate } from '../hooks/useStartDate'
+import { useNotifications } from '../hooks/useNotifications'
+import { QrShare } from '../components/QrShare'
+import { QrScan } from '../components/QrScan'
 
 export function AjustesPage() {
   const { startDate, setStartDate } = useStartDate()
   const fileRef = useRef<HTMLInputElement>(null)
+  const [showShare, setShowShare] = useState(false)
+  const [showScan, setShowScan] = useState(false)
+  const { config, setConfig, requestPermission, supported, triggersSupported, permission } =
+    useNotifications()
 
   return (
     <div className="space-y-5">
@@ -26,10 +33,62 @@ export function AjustesPage() {
       </section>
 
       <section className="rounded-2xl bg-white p-5 shadow-sm space-y-3">
-        <h2 className="font-semibold">Copia de seguridad</h2>
+        <h2 className="font-semibold">Sincronizar entre dispositivos</h2>
         <p className="text-xs text-slate-500">
-          Tus datos se guardan solo en este dispositivo. Exporta un JSON para no perderlos al cambiar de móvil.
+          Sin servidor: comparte tus datos por código QR escaneando con otro móvil.
         </p>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowShare(true)} className="px-3 py-2 rounded-lg bg-teal-600 text-white text-sm">
+            📤 Compartir por QR
+          </button>
+          <button onClick={() => setShowScan(true)} className="px-3 py-2 rounded-lg bg-teal-50 text-teal-700 text-sm border border-teal-200">
+            📷 Importar por QR
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-white p-5 shadow-sm space-y-3">
+        <h2 className="font-semibold">Recordatorio diario</h2>
+        {!supported ? (
+          <p className="text-xs text-slate-500">Tu navegador no soporta notificaciones.</p>
+        ) : (
+          <>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={config.enabled}
+                onChange={async (e) => {
+                  if (e.target.checked && permission !== 'granted') {
+                    const p = await requestPermission()
+                    if (p !== 'granted') return
+                  }
+                  setConfig({ ...config, enabled: e.target.checked })
+                }}
+                className="w-5 h-5 accent-teal-600"
+              />
+              <span className="text-sm">Recordarme la sesión cada día</span>
+            </label>
+            <label className="block text-sm">
+              <span className="text-xs text-slate-500 mr-2">Hora</span>
+              <input
+                type="time"
+                value={config.time}
+                onChange={(e) => setConfig({ ...config, time: e.target.value })}
+                disabled={!config.enabled}
+                className="rounded-lg border px-3 py-1.5 text-sm"
+              />
+            </label>
+            <p className="text-[11px] text-slate-400">
+              {triggersSupported
+                ? '✓ Notificaciones programadas en background (Chrome).'
+                : 'Tu navegador no soporta notificaciones programadas. Recibirás recordatorio al abrir la app si pasaste la hora sin marcar.'}
+            </p>
+          </>
+        )}
+      </section>
+
+      <section className="rounded-2xl bg-white p-5 shadow-sm space-y-3">
+        <h2 className="font-semibold">Copia de seguridad (JSON)</h2>
         <div className="flex flex-wrap gap-2">
           <button onClick={exportBackup} className="px-3 py-2 rounded-lg bg-teal-600 text-white text-sm">
             Exportar JSON
@@ -64,6 +123,9 @@ export function AjustesPage() {
           Borrar todos los datos
         </button>
       </section>
+
+      {showShare && <QrShare onClose={() => setShowShare(false)} />}
+      {showScan && <QrScan onClose={() => setShowScan(false)} />}
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { MEAL_SLOTS, type MealSlot } from '../hooks/useMeals'
 import { useDietPlan } from '../hooks/useDietPlan'
 import { useStartDate } from '../hooks/useStartDate'
 import { DOW_LABEL } from '../data/plan'
+import { fireConfetti } from '../components/Confetti'
 
 const LIMIT = ['Bollería', 'Alcohol (máx. 1–2/sem)', 'Refrescos', 'Pan blanco en exceso']
 
@@ -123,7 +124,11 @@ export function DietaPage() {
                         <input
                           type="checkbox"
                           checked={checked}
-                          onChange={() => toggleDone(dow, slot)}
+                          onChange={() => {
+                            const before = dayCompletion(dow).ok
+                            toggleDone(dow, slot)
+                            if (!checked && before === 4) fireConfetti({ particleCount: 60 })
+                          }}
                           className="w-5 h-5 mt-0.5 accent-teal-600"
                         />
                         <div className="flex-1 min-w-0">

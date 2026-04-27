@@ -1,4 +1,6 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useBadges } from '../hooks/useBadges'
+import { BadgeUnlockToast } from './BadgeUnlockToast'
 
 const links = [
   { to: '/', label: 'Hoy', icon: '🏠' },
@@ -6,11 +8,12 @@ const links = [
   { to: '/videos', label: 'Vídeos', icon: '▶️' },
   { to: '/peso', label: 'Peso', icon: '⚖️' },
   { to: '/dieta', label: 'Dieta', icon: '🥗' },
+  { to: '/logros', label: 'Logros', icon: '🏅' },
   { to: '/guia', label: 'Guía', icon: '📖' },
-  { to: '/ajustes', label: 'Ajustes', icon: '⚙️' },
 ]
 
 export function Layout() {
+  const { justUnlocked, dismissJustUnlocked } = useBadges()
   return (
     <div className="min-h-full pb-20 md:pb-0 md:pl-56">
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-56 flex-col border-r border-slate-200 bg-white">
@@ -37,7 +40,26 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
+        <NavLink
+          to="/ajustes"
+          className={({ isActive }) =>
+            `m-3 flex items-center gap-3 px-3 py-2 rounded-lg text-sm border-t pt-4 ${
+              isActive ? 'text-teal-700' : 'text-slate-500 hover:bg-slate-50'
+            }`
+          }
+        >
+          <span>⚙️</span>
+          <span>Ajustes</span>
+        </NavLink>
       </aside>
+
+      <Link
+        to="/ajustes"
+        className="md:hidden fixed top-3 right-3 z-30 w-10 h-10 grid place-items-center rounded-full bg-white shadow text-slate-600"
+        aria-label="Ajustes"
+      >
+        ⚙️
+      </Link>
 
       <main className="px-4 py-5 md:px-8 md:py-8 max-w-5xl mx-auto">
         <Outlet />
@@ -60,6 +82,8 @@ export function Layout() {
           </NavLink>
         ))}
       </nav>
+
+      <BadgeUnlockToast badges={justUnlocked} onDismiss={dismissJustUnlocked} />
     </div>
   )
 }
