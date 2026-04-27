@@ -32,22 +32,22 @@ export function QrShare({ onClose }: Props) {
   }, [chunks.length])
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4">
-      <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 text-center">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 rounded-3xl max-w-sm w-full p-5 space-y-3 text-center shadow-2xl">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">Compartir por QR</h3>
-          <button onClick={onClose} className="text-2xl leading-none px-2 text-slate-400">×</button>
+          <button onClick={onClose} className="text-2xl leading-none px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">×</button>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           Escanea con el otro dispositivo desde Ajustes → Importar por QR.
         </p>
-        <canvas ref={canvasRef} className="mx-auto rounded-lg border border-slate-100" />
+        <canvas ref={canvasRef} className="mx-auto rounded-lg bg-white p-2" />
         {chunks.length > 1 && (
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
             Parte {idx + 1} de {chunks.length} · mantén el otro dispositivo apuntando hasta completar.
           </div>
         )}
-        {chunks.length <= 1 && <div className="text-xs text-emerald-600">Solo 1 código, listo en un escaneo.</div>}
+        {chunks.length <= 1 && <div className="text-xs text-emerald-600 dark:text-emerald-400">Solo 1 código, listo en un escaneo.</div>}
       </div>
     </div>
   )

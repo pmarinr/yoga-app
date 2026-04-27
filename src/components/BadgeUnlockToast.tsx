@@ -29,7 +29,7 @@ export function BadgeUnlockToast({ badges, onDismiss }: Props) {
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 220, damping: 18 }}
-            className="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-3 shadow-2xl"
+            className="bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 rounded-3xl p-6 max-w-sm w-full text-center space-y-3 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">
@@ -46,7 +46,7 @@ export function BadgeUnlockToast({ badges, onDismiss }: Props) {
                 >
                   <div className="text-5xl">{b.icon}</div>
                   <div className="text-sm font-medium mt-1">{b.title}</div>
-                  <div className="text-xs text-slate-500">{b.desc}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">{b.desc}</div>
                 </motion.div>
               ))}
             </div>

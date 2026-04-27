@@ -59,35 +59,35 @@ export function QrScan({ onClose }: Props) {
   const summary = done ? summarizeImport(done) : null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 grid place-items-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-3">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm grid place-items-center p-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 rounded-3xl max-w-md w-full p-5 space-y-3 shadow-2xl">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">Importar por QR</h3>
-          <button onClick={onClose} className="text-2xl leading-none px-2 text-slate-400">×</button>
+          <button onClick={onClose} className="text-2xl leading-none px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">×</button>
         </div>
         {!done ? (
           <>
             <video ref={videoRef} className="w-full rounded-lg bg-black aspect-square object-cover" />
-            <div className="text-xs text-slate-500 text-center">
+            <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
               {total === 0 ? 'Apunta al QR del otro dispositivo…' : `Lectura: ${Object.keys(collected).length}/${total} (id ${id})`}
             </div>
             {err && <div className="text-xs text-rose-600">{err}</div>}
           </>
         ) : (
           <div className="space-y-3">
-            <div className="text-sm text-slate-700">
+            <div className="text-sm text-slate-700 dark:text-slate-200">
               ✅ Datos leídos. Esto sustituirá los datos de este dispositivo:
             </div>
-            <ul className="text-sm text-slate-600 space-y-1">
+            <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
               <li>• {summary!.sessions} sesiones marcadas</li>
               <li>• {summary!.weights} registros de peso</li>
               <li>• {summary!.meals} comidas marcadas</li>
             </ul>
             <div className="flex gap-2 justify-end">
-              <button onClick={onClose} className="px-3 py-2 rounded-lg bg-slate-100 text-sm">Cancelar</button>
+              <button onClick={onClose} className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm">Cancelar</button>
               <button
                 onClick={() => applyImport(done)}
-                className="px-3 py-2 rounded-lg bg-teal-600 text-white text-sm font-medium"
+                className="px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium shadow-glow active:scale-95 transition"
               >
                 Aplicar e importar
               </button>

@@ -4,6 +4,13 @@ import { DayModal } from '../components/DayModal'
 import { HeatMap } from '../components/HeatMap'
 import { useStartDate } from '../hooks/useStartDate'
 import { PHASE_LABEL, PLAN } from '../data/plan'
+import { Card, SectionTitle } from '../components/Card'
+
+const PHASE_GRADIENT: Record<1 | 2 | 3, string> = {
+  1: 'from-[#34C759] to-[#00C7BE]',
+  2: 'from-[#FF9F0A] to-[#FF6E5C]',
+  3: 'from-[#FF6E5C] to-[#FA114F]',
+}
 
 export function PlanPage() {
   const [sel, setSel] = useState<{ week: number; dow: number } | null>(null)
@@ -11,35 +18,44 @@ export function PlanPage() {
   const today = currentDayIndex()
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold">Plan 12 semanas</h1>
-        <p className="text-sm text-slate-500">Toca un día para ver el vídeo y marcarlo como hecho.</p>
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-yoga">Plan</div>
+        <h1 className="text-4xl font-semibold tracking-tightest">12 semanas</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Toca un día para ver el vídeo y marcarlo.
+        </p>
       </header>
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm">
-        <h2 className="font-semibold mb-3 text-sm">Consistencia</h2>
+      <Card>
+        <SectionTitle eyebrow="Consistencia" title="Tu mapa de calor" color="#FF6E5C" />
         <HeatMap />
-      </section>
+      </Card>
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm">
+      <Card className="!p-4">
         <WeekGrid onSelect={(w, d) => setSel({ week: w, dow: d })} highlight={today} />
-      </section>
+      </Card>
 
       <section className="grid sm:grid-cols-3 gap-3">
         {[1, 2, 3].map((p) => {
           const ws = PLAN.filter((w) => w.phase === p)
           const first = ws[0]
           return (
-            <div key={p} className="rounded-2xl bg-white p-4 shadow-sm text-sm">
-              <div className="font-semibold">{PHASE_LABEL[p as 1 | 2 | 3]}</div>
-              <div className="text-slate-500 text-xs mb-2">
+            <div
+              key={p}
+              className={`rounded-3xl p-5 text-white shadow-card bg-gradient-to-br ${PHASE_GRADIENT[p as 1 | 2 | 3]}`}
+            >
+              <div className="text-[10px] uppercase tracking-wider opacity-90 font-semibold">
+                Fase {p}
+              </div>
+              <div className="text-xl font-semibold tracking-tight">{PHASE_LABEL[p as 1 | 2 | 3].split('—')[1]?.trim()}</div>
+              <div className="text-xs opacity-90 mb-3">
                 Semanas {ws[0].week}–{ws[ws.length - 1].week}
               </div>
-              <ul className="space-y-1 text-slate-700">
-                <li>• {first.frequencyLabel}</li>
-                <li>• {first.durationLabel}</li>
-                <li>• Intensidad: {first.intensity}</li>
+              <ul className="space-y-1 text-sm opacity-95">
+                <li>· {first.frequencyLabel}</li>
+                <li>· {first.durationLabel}</li>
+                <li>· Intensidad: {first.intensity}</li>
               </ul>
             </div>
           )

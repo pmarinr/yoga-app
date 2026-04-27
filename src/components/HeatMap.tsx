@@ -16,18 +16,19 @@ export function HeatMap() {
     return n
   }
 
-  const cellColor = (sessionDone: boolean, dietN: number, isRest: boolean) => {
-    if (sessionDone && dietN >= 3) return 'bg-teal-600'
-    if (sessionDone) return 'bg-teal-400'
-    if (dietN >= 3) return 'bg-amber-300'
-    if (dietN > 0) return 'bg-amber-100'
-    if (isRest) return 'bg-slate-50'
-    return 'bg-slate-100'
+  const cellStyle = (sessionDone: boolean, dietN: number, isRest: boolean) => {
+    if (sessionDone && dietN >= 3)
+      return { background: 'linear-gradient(135deg, #FF6E5C, #34C759)' }
+    if (sessionDone) return { background: '#FF6E5C' }
+    if (dietN >= 3) return { background: '#34C759' }
+    if (dietN > 0) return { background: 'rgba(52,199,89,0.35)' }
+    if (isRest) return { background: 'rgba(120,120,128,0.10)' }
+    return { background: 'rgba(120,120,128,0.18)' }
   }
 
   return (
     <div>
-      <div className="flex items-center gap-1 text-[10px] text-slate-400 mb-1 ml-6">
+      <div className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 mb-1.5 ml-7 uppercase tracking-wider font-semibold">
         {DOW_LABEL.map((d) => (
           <span key={d} className="w-5 text-center">{d}</span>
         ))}
@@ -35,7 +36,9 @@ export function HeatMap() {
       <div className="space-y-1">
         {PLAN.map((w) => (
           <div key={w.week} className="flex items-center gap-1">
-            <span className="w-5 text-[10px] text-slate-400 text-right pr-1">{w.week}</span>
+            <span className="w-6 text-[10px] text-slate-400 dark:text-slate-500 text-right pr-1 tabular-nums">
+              {w.week}
+            </span>
             {w.days.map((d) => {
               const sessDone = !!get(d.week, d.dow)?.done
               const dietN = dietCount(d.week, d.dow)
@@ -43,7 +46,8 @@ export function HeatMap() {
               return (
                 <div
                   key={d.dow}
-                  className={`w-5 h-5 rounded ${cellColor(sessDone, dietN, rest)}`}
+                  className="w-5 h-5 rounded-md transition-all hover:scale-125"
+                  style={cellStyle(sessDone, dietN, rest)}
                   title={`Sem ${w.week} · ${DOW_LABEL[d.dow - 1]}: ${sessDone ? 'sesión ✓' : '—'} · dieta ${dietN}/5`}
                 />
               )
@@ -51,12 +55,21 @@ export function HeatMap() {
           </div>
         ))}
       </div>
-      <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-slate-500">
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-teal-600 inline-block" /> sesión + dieta</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-teal-400 inline-block" /> sesión</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-300 inline-block" /> dieta</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-slate-100 inline-block" /> nada</span>
+      <div className="mt-4 flex flex-wrap gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+        <Legend label="sesión + dieta" gradient="linear-gradient(135deg, #FF6E5C, #34C759)" />
+        <Legend label="sesión" color="#FF6E5C" />
+        <Legend label="dieta" color="#34C759" />
+        <Legend label="poco" color="rgba(52,199,89,0.35)" />
       </div>
     </div>
+  )
+}
+
+function Legend({ label, color, gradient }: { label: string; color?: string; gradient?: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="w-3 h-3 rounded-md" style={{ background: gradient ?? color }} />
+      {label}
+    </span>
   )
 }

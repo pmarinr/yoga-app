@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { WeightChart } from '../components/WeightChart'
 import { START_KG, TARGET_KG, useWeights } from '../hooks/useWeights'
 import { todayISO } from '../hooks/useStartDate'
+import { Card, HeroMetric, SectionTitle } from '../components/Card'
 
 export function PesoPage() {
   const { weights, add, remove, last, lost, progressPct } = useWeights()
@@ -16,78 +17,110 @@ export function PesoPage() {
     setKg('')
   }
 
+  const trend =
+    weights.length >= 2 ? +(weights[weights.length - 1].kg - weights[weights.length - 2].kg).toFixed(1) : 0
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold">Peso</h1>
-        <p className="text-sm text-slate-500">
-          Inicio {START_KG} kg → objetivo {TARGET_KG} kg.
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-peso">Peso</div>
+        <h1 className="text-4xl font-semibold tracking-tightest">Tu progreso</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Inicio {START_KG} kg · objetivo {TARGET_KG} kg
         </p>
       </header>
 
-      <section className="grid sm:grid-cols-3 gap-3">
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <div className="text-xs text-slate-500">Último</div>
-          <div className="text-2xl font-semibold">{last ? `${last.kg} kg` : '—'}</div>
+      <Card>
+        <div className="grid grid-cols-3 gap-4 items-end">
+          <HeroMetric
+            label="Actual"
+            value={last ? `${last.kg}` : '—'}
+            unit={last ? 'kg' : undefined}
+            color="#0A84FF"
+            hint={last?.date}
+          />
+          <HeroMetric
+            label="Perdidos"
+            value={`${lost.toFixed(1)}`}
+            unit="kg"
+            color="#34C759"
+            hint={trend !== 0 ? (trend < 0 ? `▼ ${Math.abs(trend)}` : `▲ ${trend}`) : '—'}
+          />
+          <HeroMetric
+            label="Progreso"
+            value={`${progressPct.toFixed(0)}`}
+            unit="%"
+            color="#AF52DE"
+          />
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <div className="text-xs text-slate-500">Perdidos</div>
-          <div className="text-2xl font-semibold text-teal-700">−{lost.toFixed(1)} kg</div>
+        <div className="mt-4 h-2 rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{
+              width: `${progressPct}%`,
+              background: 'linear-gradient(90deg, #34C759, #1FD3FF, #0A84FF)',
+            }}
+          />
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <div className="text-xs text-slate-500">Progreso</div>
-          <div className="text-2xl font-semibold">{progressPct.toFixed(0)}%</div>
-          <div className="mt-1 h-2 rounded bg-slate-100 overflow-hidden">
-            <div className="h-full bg-teal-500" style={{ width: `${progressPct}%` }} />
-          </div>
-        </div>
-      </section>
+      </Card>
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
+      <Card>
+        <SectionTitle eyebrow="Tendencia" title="Evolución" color="#0A84FF" />
         <WeightChart data={weights} />
-      </section>
+      </Card>
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="font-semibold mb-3">Añadir peso</h2>
+      <Card>
+        <SectionTitle eyebrow="Nuevo registro" title="Añadir peso" color="#0A84FF" />
         <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
           <label className="text-sm">
-            <div className="text-xs text-slate-500 mb-1">Fecha</div>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border px-3 py-2" />
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Fecha</div>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
+            />
           </label>
           <label className="text-sm">
-            <div className="text-xs text-slate-500 mb-1">Peso (kg)</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Peso (kg)</div>
             <input
               type="number"
               step="0.1"
               inputMode="decimal"
               value={kg}
               onChange={(e) => setKg(e.target.value)}
-              className="rounded-lg border px-3 py-2 w-28"
+              className="rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2 w-28"
               placeholder="93.5"
               required
             />
           </label>
-          <button type="submit" className="px-4 py-2 rounded-lg bg-teal-600 text-white text-sm font-medium">
+          <button
+            type="submit"
+            className="px-5 py-2.5 rounded-full bg-peso hover:opacity-90 text-white text-sm font-semibold shadow-glow active:scale-95 transition"
+          >
             Guardar
           </button>
         </form>
-      </section>
+      </Card>
 
       {weights.length > 0 && (
-        <section className="rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="font-semibold mb-3">Histórico</h2>
-          <ul className="divide-y text-sm">
+        <Card>
+          <SectionTitle eyebrow="Histórico" title="Registros" color="#0A84FF" />
+          <ul className="divide-y divider text-sm">
             {[...weights].reverse().map((w) => (
-              <li key={w.date} className="flex items-center justify-between py-2">
-                <span className="text-slate-600">{w.date}</span>
-                <span className="font-medium">{w.kg} kg</span>
-                <button onClick={() => remove(w.date)} className="text-xs text-rose-500 hover:underline">
+              <li key={w.date} className="flex items-center justify-between py-3">
+                <span className="text-slate-600 dark:text-slate-400 tabular-nums">{w.date}</span>
+                <span className="font-semibold tabular-nums">{w.kg} kg</span>
+                <button
+                  onClick={() => remove(w.date)}
+                  className="text-xs text-rose-500 hover:underline"
+                >
                   borrar
                 </button>
               </li>
             ))}
           </ul>
-        </section>
+        </Card>
       )}
     </div>
   )
