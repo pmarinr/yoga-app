@@ -3,6 +3,7 @@ import { WeightChart } from '../components/WeightChart'
 import { START_KG, TARGET_KG, useWeights } from '../hooks/useWeights'
 import { todayISO } from '../hooks/useStartDate'
 import { Card, HeroMetric, SectionTitle } from '../components/Card'
+import { forecastTarget, formatEta } from '../lib/forecast'
 
 export function PesoPage() {
   const { weights, add, remove, last, lost, progressPct } = useWeights()
@@ -19,6 +20,8 @@ export function PesoPage() {
 
   const trend =
     weights.length >= 2 ? +(weights[weights.length - 1].kg - weights[weights.length - 2].kg).toFixed(1) : 0
+
+  const forecast = forecastTarget(weights, TARGET_KG)
 
   return (
     <div className="space-y-6">
@@ -65,8 +68,60 @@ export function PesoPage() {
       </Card>
 
       <Card>
-        <SectionTitle eyebrow="Tendencia" title="Evolución" color="#0A84FF" />
+        <SectionTitle
+          eyebrow="Tendencia"
+          title="Evolución"
+          color="#0A84FF"
+          right={
+            forecast ? (
+              <span
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  background: forecast.kgPerWeek < 0 ? 'rgba(52,199,89,0.15)' : 'rgba(255,159,10,0.15)',
+                  color: forecast.kgPerWeek < 0 ? '#34C759' : '#FF9F0A',
+                }}
+              >
+                {forecast.kgPerWeek > 0 ? '+' : ''}
+                {forecast.kgPerWeek} kg/sem
+              </span>
+            ) : null
+          }
+        />
         <WeightChart data={weights} />
+        {forecast && (
+          <div className="mt-4 rounded-2xl bg-gradient-to-br from-meta/10 to-peso/10 dark:from-meta/15 dark:to-peso/15 border border-meta/20 dark:border-meta/30 p-3 flex items-center gap-3">
+            <div className="text-2xl">🎯</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] uppercase tracking-wider text-meta font-semibold">
+                Estimación al objetivo
+              </div>
+              {forecast.eta ? (
+                <div className="text-sm">
+                  Llegarías a <strong className="font-semibold tabular-nums">{TARGET_KG} kg</strong>{' '}
+                  alrededor del{' '}
+                  <strong className="font-semibold capitalize">{formatEta(forecast.eta)}</strong>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {' '}
+                    al ritmo actual.
+                  </span>
+                </div>
+              ) : forecast.kgPerWeek >= 0 ? (
+                <div className="text-sm text-slate-700 dark:text-slate-200">
+                  Tu tendencia actual no baja: prueba a aumentar actividad o ajustar la dieta.
+                </div>
+              ) : (
+                <div className="text-sm text-slate-700 dark:text-slate-200">
+                  Sigue así, registra más pesos para afinar la estimación.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {!forecast && weights.length < 2 && (
+          <div className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
+            Añade al menos 2 registros para ver la línea de tendencia.
+          </div>
+        )}
       </Card>
 
       <Card>
