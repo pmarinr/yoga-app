@@ -3,7 +3,8 @@ import { WeekGrid } from '../components/WeekGrid'
 import { DayModal } from '../components/DayModal'
 import { HeatMap } from '../components/HeatMap'
 import { useStartDate } from '../hooks/useStartDate'
-import { PHASE_LABEL, PLAN } from '../data/plan'
+import { PHASE_LABEL } from '../data/plan'
+import { usePlan } from '../hooks/usePlan'
 import { Card, SectionTitle } from '../components/Card'
 
 const PHASE_GRADIENT: Record<1 | 2 | 3, string> = {
@@ -16,12 +17,13 @@ export function PlanPage() {
   const [sel, setSel] = useState<{ week: number; dow: number } | null>(null)
   const { currentDayIndex } = useStartDate()
   const today = currentDayIndex()
+  const PLAN = usePlan()
 
   return (
     <div className="space-y-6">
       <header>
         <div className="text-[11px] font-semibold uppercase tracking-wider text-yoga">Plan</div>
-        <h1 className="text-4xl font-semibold tracking-tightest">12 semanas</h1>
+        <h1 className="text-4xl font-semibold tracking-tightest">{PLAN.length} semanas</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Toca un día para ver el vídeo y marcarlo.
         </p>

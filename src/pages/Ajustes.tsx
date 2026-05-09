@@ -3,6 +3,7 @@ import { clearAll, exportBackup, importBackup } from '../lib/backup'
 import { useStartDate } from '../hooks/useStartDate'
 import { useNotifications } from '../hooks/useNotifications'
 import { useTheme } from '../hooks/useTheme'
+import { useGoals } from '../hooks/useGoals'
 import { QrShare } from '../components/QrShare'
 import { QrScan } from '../components/QrScan'
 import { Card, SectionTitle } from '../components/Card'
@@ -15,6 +16,7 @@ export function AjustesPage() {
   const { config, setConfig, requestPermission, supported, triggersSupported, permission } =
     useNotifications()
   const { theme, setTheme } = useTheme()
+  const { goals, setGoals, endDate, setEndDate, setWeeks } = useGoals(startDate)
 
   return (
     <div className="space-y-6">
@@ -53,6 +55,65 @@ export function AjustesPage() {
         />
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
           Determina qué semana se muestra como "hoy".
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle eyebrow="Meta" title="Tu objetivo" color="#FF9F0A" />
+        <div className="grid grid-cols-2 gap-3">
+          <label className="text-sm">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Peso inicial (kg)</div>
+            <input
+              type="number"
+              step="0.1"
+              inputMode="decimal"
+              value={goals.startKg}
+              onChange={(e) => {
+                const n = parseFloat(e.target.value.replace(',', '.'))
+                if (isFinite(n) && n > 0) setGoals({ ...goals, startKg: n })
+              }}
+              className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
+            />
+          </label>
+          <label className="text-sm">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Peso meta (kg)</div>
+            <input
+              type="number"
+              step="0.1"
+              inputMode="decimal"
+              value={goals.targetKg}
+              onChange={(e) => {
+                const n = parseFloat(e.target.value.replace(',', '.'))
+                if (isFinite(n) && n > 0) setGoals({ ...goals, targetKg: n })
+              }}
+              className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
+            />
+          </label>
+          <label className="text-sm">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Semanas del plan</div>
+            <input
+              type="number"
+              min={1}
+              max={52}
+              value={goals.weeks}
+              onChange={(e) => setWeeks(Number(e.target.value))}
+              className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
+            />
+          </label>
+          <label className="text-sm">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Fecha límite</div>
+            <input
+              type="date"
+              value={endDate ?? ''}
+              onChange={(e) => {
+                if (e.target.value) setEndDate(e.target.value, startDate)
+              }}
+              className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
+            />
+          </label>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          Cambiar fecha límite recalcula las semanas y reorganiza las fases (1/3 cada una).
         </p>
       </Card>
 

@@ -1,12 +1,14 @@
-import { DOW_LABEL, PLAN } from '../data/plan'
+import { DOW_LABEL } from '../data/plan'
 import { useSessions } from '../hooks/useSessions'
 import { useLocalStorage } from '../hooks/useLocalStorage'
+import { usePlan } from '../hooks/usePlan'
 
 type DietDone = Record<string, boolean>
 
 export function HeatMap() {
   const { get } = useSessions()
   const [dietDone] = useLocalStorage<DietDone>('yoga.dietDone', {})
+  const PLAN = usePlan()
 
   const dietCount = (week: number, dow: number) => {
     let n = 0

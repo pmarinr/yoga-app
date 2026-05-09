@@ -1,5 +1,6 @@
-import { DOW_LABEL, PLAN, sessionEmoji } from '../data/plan'
+import { DOW_LABEL, sessionEmoji } from '../data/plan'
 import { useSessions } from '../hooks/useSessions'
+import { usePlan } from '../hooks/usePlan'
 
 interface Props {
   onSelect: (week: number, dow: number) => void
@@ -14,6 +15,7 @@ const PHASE_DOT: Record<1 | 2 | 3, string> = {
 
 export function WeekGrid({ onSelect, highlight }: Props) {
   const { get } = useSessions()
+  const PLAN = usePlan()
   return (
     <div className="overflow-x-auto -mx-1 px-1">
       <table className="text-xs md:text-sm border-collapse mx-auto">

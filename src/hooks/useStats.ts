@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
-import { PLAN } from '../data/plan'
 import { useSessions } from './useSessions'
 import { useWeights, START_KG } from './useWeights'
 import { useLocalStorage } from './useLocalStorage'
 import { useStartDate } from './useStartDate'
+import { useGoals } from './useGoals'
+import { usePlan } from './usePlan'
 
 interface DietDone {
   [key: string]: boolean // `${week}-${dow}-${slot}`
@@ -21,7 +22,11 @@ export interface Stats {
   kgLost: number
   todaySessionDone: boolean
   todayDietPct: number            // 0..1
-  weekRecentLogged: boolean       // peso registrado en últimos 7 días
+  weekRecentLogged: boolean
+  // metas configurables
+  startKg: number
+  targetKg: number
+  totalWeeks: number
 }
 
 const dayDiff = (a: Date, b: Date) =>
@@ -31,16 +36,12 @@ export function useStats(): Stats {
   const { sessions } = useSessions()
   const { weights, last, lost } = useWeights()
   const { startDate, currentDayIndex } = useStartDate()
+  const { goals } = useGoals()
+  const plan = usePlan()
   const [dietDone] = useLocalStorage<DietDone>('yoga.dietDone', {})
 
   return useMemo(() => {
-    // Sesiones programadas (excluye descansos): map (week-dow) -> tiene programada
-    const programmed = new Map<string, boolean>()
-    PLAN.forEach((w) =>
-      w.days.forEach((d) => {
-        if (d.type !== 'descanso') programmed.set(`${d.week}-${d.dow}`, true)
-      }),
-    )
+    const totalWeeks = goals.weeks
 
     // Lista de fechas reales en las que se completó sesión, ordenadas
     const start = new Date(startDate + 'T00:00:00')
@@ -48,6 +49,8 @@ export function useStats(): Stats {
     Object.entries(sessions).forEach(([key, log]) => {
       if (!log.done) return
       const [w, d] = key.split('-').map(Number)
+      // Ignora datos fuera del plan actual
+      if (w > totalWeeks) return
       const offset = (w - 1) * 7 + (d - 1)
       const date = new Date(start)
       date.setDate(date.getDate() + offset)
@@ -66,7 +69,6 @@ export function useStats(): Stats {
       prev = d
     }
 
-    // Streak actual (terminando hoy o ayer)
     let currentStreak = 0
     if (doneDates.length > 0) {
       const today = new Date()
@@ -85,13 +87,13 @@ export function useStats(): Stats {
 
     // Semanas con todas las sesiones programadas hechas
     let weeksCompleted = 0
-    PLAN.forEach((w) => {
+    plan.forEach((w) => {
       const need = w.days.filter((d) => d.type !== 'descanso').map((d) => `${d.week}-${d.dow}`)
       if (need.length > 0 && need.every((k) => sessions[k]?.done)) weeksCompleted++
     })
 
-    // Dieta: días con 5/5 marcados y semanas perfectas
-    const perDayCount: Record<string, number> = {} // key `${week}-${dow}` -> count
+    // Dieta
+    const perDayCount: Record<string, number> = {}
     Object.entries(dietDone).forEach(([k, v]) => {
       if (!v) return
       const parts = k.split('-')
@@ -100,14 +102,14 @@ export function useStats(): Stats {
     })
     const perfectDietDays = Object.values(perDayCount).filter((c) => c >= 5).length
     let perfectDietWeeks = 0
-    for (let w = 1; w <= 12; w++) {
+    for (let w = 1; w <= totalWeeks; w++) {
       let okDays = 0
       for (let d = 1; d <= 7; d++) if ((perDayCount[`${w}-${d}`] ?? 0) >= 5) okDays++
       if (okDays === 7) perfectDietWeeks++
     }
 
     // Hoy
-    const today = currentDayIndex()
+    const today = currentDayIndex(totalWeeks)
     const todaySessionDone = today ? !!sessions[`${today.week}-${today.dow}`]?.done : false
     let todayDietPct = 0
     if (today) {
@@ -115,7 +117,6 @@ export function useStats(): Stats {
       todayDietPct = Math.min(1, cnt / 5)
     }
 
-    // Peso reciente
     let weekRecentLogged = false
     if (last) {
       const lastDate = new Date(last.date + 'T00:00:00')
@@ -137,8 +138,11 @@ export function useStats(): Stats {
       todaySessionDone,
       todayDietPct,
       weekRecentLogged,
+      startKg: goals.startKg,
+      targetKg: goals.targetKg,
+      totalWeeks,
     }
-  }, [sessions, weights, last, lost, startDate, dietDone, currentDayIndex])
+  }, [sessions, weights, last, lost, startDate, dietDone, currentDayIndex, goals, plan])
 }
 
 export { START_KG }

@@ -1,6 +1,7 @@
-import { PLAN, PHASE_LABEL, SESSION_LABEL, DOW_LABEL } from '../data/plan'
+import { PHASE_LABEL, SESSION_LABEL, DOW_LABEL } from '../data/plan'
 import { videoById } from '../data/videos'
 import { useSessions } from '../hooks/useSessions'
+import { usePlan } from '../hooks/usePlan'
 import { VideoEmbed } from './VideoEmbed'
 import { fireConfetti } from './Confetti'
 
@@ -11,8 +12,11 @@ interface Props {
 }
 
 export function DayModal({ week, dow, onClose }: Props) {
-  const w = PLAN.find((p) => p.week === week)!
-  const day = w.days.find((d) => d.dow === dow)!
+  const PLAN = usePlan()
+  const w = PLAN.find((p) => p.week === week)
+  if (!w) return null
+  const day = w.days.find((d) => d.dow === dow)
+  if (!day) return null
   const video = videoById(day.videoId)
   const { get, toggle, setNotes } = useSessions()
   const log = get(week, dow)

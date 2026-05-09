@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { START_KG, TARGET_KG, type WeightEntry } from '../hooks/useWeights'
+import { type WeightEntry, useWeights } from '../hooks/useWeights'
 import { useTheme } from '../hooks/useTheme'
 import { forecastTarget } from '../lib/forecast'
 
@@ -19,6 +19,7 @@ interface Props {
 
 export function WeightChart({ data }: Props) {
   const { isDark } = useTheme()
+  const { startKg: START_KG, targetKg: TARGET_KG } = useWeights()
   const grid = isDark ? '#1f2937' : '#e2e8f0'
   const text = isDark ? '#94a3b8' : '#475569'
 

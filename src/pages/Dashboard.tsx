@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PHASE_LABEL, PLAN, SESSION_LABEL, sessionEmoji } from '../data/plan'
+import { PHASE_LABEL, SESSION_LABEL, sessionEmoji } from '../data/plan'
+import { usePlan } from '../hooks/usePlan'
 import { videoById } from '../data/videos'
 import { useSessions } from '../hooks/useSessions'
 import { useStartDate, todayISO } from '../hooks/useStartDate'
@@ -15,6 +16,7 @@ import { ActivityRings } from '../components/ActivityRings'
 import { Card, Pill, SectionTitle, StatTile } from '../components/Card'
 
 export function Dashboard() {
+  const PLAN = usePlan()
   const { startDate, setStartDate, currentDayIndex } = useStartDate()
   const idx = currentDayIndex()
   const { get } = useSessions()
@@ -47,8 +49,10 @@ export function Dashboard() {
     )
   }
 
-  const weekData = PLAN.find((w) => w.week === idx.week)!
-  const day = weekData.days.find((d) => d.dow === idx.dow)!
+  const weekData = PLAN.find((w) => w.week === idx.week)
+  if (!weekData) return null
+  const day = weekData.days.find((d) => d.dow === idx.dow)
+  if (!day) return null
   const video = videoById(day.videoId)
   const log = get(idx.week, idx.dow)
 

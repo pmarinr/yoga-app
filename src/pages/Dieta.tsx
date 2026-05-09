@@ -5,6 +5,7 @@ import { useStartDate } from '../hooks/useStartDate'
 import { DOW_LABEL } from '../data/plan'
 import { fireConfetti } from '../components/Confetti'
 import { Card, SectionTitle } from '../components/Card'
+import { useGoals } from '../hooks/useGoals'
 
 const LIMIT = ['Bollería', 'Alcohol (máx. 1–2/sem)', 'Refrescos', 'Pan blanco en exceso']
 
@@ -28,6 +29,7 @@ const CAT_LABEL: Record<string, string> = {
 
 export function DietaPage() {
   const { currentDayIndex } = useStartDate()
+  const { goals } = useGoals()
   const today = currentDayIndex()
   const [week, setWeek] = useState(today?.week ?? 1)
   const {
@@ -73,7 +75,7 @@ export function DietaPage() {
         <SectionTitle eyebrow="Semana" title={`Semana ${week}`} color="#34C759" />
         <div className="overflow-x-auto -mx-1 px-1">
           <div className="inline-flex gap-2 pb-1">
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((w) => {
+            {Array.from({ length: goals.weeks }, (_, i) => i + 1).map((w) => {
               const active = week === w
               const isToday = today?.week === w
               return (
