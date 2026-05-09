@@ -103,6 +103,11 @@ export function PesoPage() {
           }
         />
         <WeightChart data={weights} />
+        <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+          <Legend label="Peso real" color="#0A84FF" />
+          <Legend label="Media 7 días" color="#00C7BE" />
+          <Legend label="Tendencia" color="#AF52DE" dashed />
+        </div>
         {forecast && (
           <div className="mt-4 space-y-2">
             <div className="rounded-2xl bg-gradient-to-br from-meta/10 to-peso/10 dark:from-meta/15 dark:to-peso/15 border border-meta/20 dark:border-meta/30 p-3 flex items-center gap-3">
@@ -200,6 +205,22 @@ export function PesoPage() {
         </Card>
       )}
     </div>
+  )
+}
+
+function Legend({ label, color, dashed }: { label: string; color: string; dashed?: boolean }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span
+        className="inline-block w-4 h-0.5"
+        style={
+          dashed
+            ? { background: `repeating-linear-gradient(90deg, ${color} 0 4px, transparent 4px 8px)` }
+            : { background: color }
+        }
+      />
+      {label}
+    </span>
   )
 }
 

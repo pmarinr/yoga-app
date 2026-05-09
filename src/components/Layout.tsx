@@ -14,6 +14,7 @@ const links = [
   { to: '/videos', label: 'Vídeos', icon: '▶️', color: '#FA114F' },
   { to: '/peso', label: 'Peso', icon: '⚖️', color: '#0A84FF' },
   { to: '/dieta', label: 'Dieta', icon: '🥗', color: '#34C759' },
+  { to: '/stats', label: 'Stats', icon: '📊', color: '#AF52DE' },
   { to: '/logros', label: 'Logros', icon: '🏅', color: '#AF52DE' },
   { to: '/guia', label: 'Guía', icon: '📖', color: '#5856D6' },
 ]
@@ -100,7 +101,7 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <nav className="md:hidden fixed bottom-3 left-3 right-3 z-40 glass border divider rounded-full shadow-card grid grid-cols-7 px-1 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.375rem)]">
+      <nav className="md:hidden fixed bottom-3 left-3 right-3 z-40 glass border divider rounded-full shadow-card grid grid-cols-8 px-1 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.375rem)]">
         {links.map((l) => (
           <NavLink
             key={l.to}

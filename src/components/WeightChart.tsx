@@ -2,7 +2,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ReferenceDot,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -12,6 +11,7 @@ import {
 import { type WeightEntry, useWeights } from '../hooks/useWeights'
 import { useTheme } from '../hooks/useTheme'
 import { forecastTarget } from '../lib/forecast'
+import { movingAverage } from '../lib/movingAverage'
 
 interface Props {
   data: WeightEntry[]
@@ -22,6 +22,7 @@ interface Row {
   date: string
   kg: number | null
   trend: number | null
+  ma7?: number | null
 }
 
 const formatTick = (t: number) =>
@@ -42,14 +43,18 @@ export function WeightChart({ data }: Props) {
   }
 
   const forecast = forecastTarget(data, TARGET_KG)
-  const series: Row[] = forecast
+  const ma = movingAverage(data, 7)
+  const maByDate = new Map(ma.map((m) => [m.date, m.ma]))
+
+  const series: Row[] = (forecast
     ? forecast.series
     : data.map((d) => ({
         t: new Date(d.date + 'T00:00:00').getTime(),
         date: d.date,
         kg: d.kg,
-        trend: null,
+        trend: null as number | null,
       }))
+  ).map((r) => ({ ...r, ma7: maByDate.get(r.date) ?? null }))
 
   // Dominio temporal: del primer registro al último punto (real o proyectado)
   const tMin = series[0].t
@@ -90,7 +95,8 @@ export function WeightChart({ data }: Props) {
             labelFormatter={(t) => formatTick(Number(t))}
             formatter={(value, name) => {
               if (value == null) return ['—', name as string]
-              return [`${value} kg`, name === 'kg' ? 'Real' : 'Tendencia']
+              const label = name === 'kg' ? 'Real' : name === 'trend' ? 'Tendencia' : 'Media 7d'
+              return [`${value} kg`, label]
             }}
           />
           <ReferenceLine
@@ -118,6 +124,15 @@ export function WeightChart({ data }: Props) {
           )}
           <Line
             type="monotone"
+            dataKey="ma7"
+            stroke="#00C7BE"
+            strokeWidth={2}
+            dot={false}
+            connectNulls
+            isAnimationActive={false}
+          />
+          <Line
+            type="monotone"
             dataKey="kg"
             stroke="#0A84FF"
             strokeWidth={2.5}
@@ -125,17 +140,6 @@ export function WeightChart({ data }: Props) {
             connectNulls={false}
             isAnimationActive
           />
-          {forecast?.etaT && (
-            <ReferenceDot
-              x={forecast.etaT}
-              y={TARGET_KG}
-              r={6}
-              fill="#AF52DE"
-              stroke="#fff"
-              strokeWidth={2}
-              label={{ value: '🎯', fontSize: 14, position: 'top' }}
-            />
-          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

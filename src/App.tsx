@@ -7,6 +7,7 @@ import { PesoPage } from './pages/Peso'
 import { DietaPage } from './pages/Dieta'
 import { GuiaPage } from './pages/Guia'
 import { LogrosPage } from './pages/Logros'
+import { StatsPage } from './pages/Stats'
 import { AjustesPage } from './pages/Ajustes'
 
 const router = createBrowserRouter(
@@ -21,6 +22,7 @@ const router = createBrowserRouter(
         { path: 'peso', element: <PesoPage /> },
         { path: 'dieta', element: <DietaPage /> },
         { path: 'logros', element: <LogrosPage /> },
+        { path: 'stats', element: <StatsPage /> },
         { path: 'guia', element: <GuiaPage /> },
         { path: 'ajustes', element: <AjustesPage /> },
       ],
