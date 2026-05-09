@@ -1,8 +1,12 @@
+import { useEffect } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useBadges } from '../hooks/useBadges'
 import { BadgeUnlockToast } from './BadgeUnlockToast'
 import { ThemeToggle } from './ThemeToggle'
 import { useTheme } from '../hooks/useTheme'
+import { useGoals } from '../hooks/useGoals'
+import { useStartDate } from '../hooks/useStartDate'
+import { formatShortDate } from '../lib/dates'
 
 const links = [
   { to: '/', label: 'Hoy', icon: '🏠', color: '#FF6E5C' },
@@ -17,15 +21,29 @@ const links = [
 export function Layout() {
   const { justUnlocked, dismissJustUnlocked } = useBadges()
   useTheme()
+  const { startDate } = useStartDate()
+  const { goals, endDate } = useGoals(startDate)
+  const title = `Yoga ${goals.weeks} ${goals.weeks === 1 ? 'semana' : 'semanas'}`
+  const weightLabel = `${goals.startKg} → ${goals.targetKg} kg`
+  const dateLabel = endDate ? `${formatShortDate(startDate)} – ${formatShortDate(endDate)}` : null
+
+  useEffect(() => {
+    document.title = title
+  }, [title])
 
   return (
     <div className="min-h-full pb-28 md:pb-0 md:pl-64">
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 flex-col glass border-r divider z-30">
         <div className="px-5 py-6 border-b divider">
           <div className="text-xl font-semibold tracking-tightest bg-gradient-to-r from-yoga to-[#FA114F] bg-clip-text text-transparent">
-            Yoga 12 sem.
+            {title}
           </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">94 → 85 kg</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">{weightLabel}</div>
+          {dateLabel && (
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 tabular-nums mt-0.5">
+              {dateLabel}
+            </div>
+          )}
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {links.map((l) => (

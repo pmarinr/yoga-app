@@ -151,7 +151,14 @@ export const PLAN: PlanWeek[] = buildPlan(12)
 export const PHASE_COLOR: Record<Phase, string> = {
   1: 'bg-emerald-200',
   2: 'bg-amber-300',
-  3: 'bg-orange-400',
+  3: 'bg-rose-500',
+}
+
+// Color hex de cada fase (paleta iOS)
+export const PHASE_HEX: Record<Phase, string> = {
+  1: '#34C759', // verde
+  2: '#FFCC00', // amarillo/dorado
+  3: '#FF3B30', // rojo intenso
 }
 
 export const PHASE_LABEL: Record<Phase, string> = {

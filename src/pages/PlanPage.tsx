@@ -9,8 +9,8 @@ import { Card, SectionTitle } from '../components/Card'
 
 const PHASE_GRADIENT: Record<1 | 2 | 3, string> = {
   1: 'from-[#34C759] to-[#00C7BE]',
-  2: 'from-[#FF9F0A] to-[#FF6E5C]',
-  3: 'from-[#FF6E5C] to-[#FA114F]',
+  2: 'from-[#FFCC00] to-[#FF9500]',
+  3: 'from-[#FF3B30] to-[#C70F2E]',
 }
 
 export function PlanPage() {
@@ -29,14 +29,16 @@ export function PlanPage() {
         </p>
       </header>
 
-      <Card>
-        <SectionTitle eyebrow="Consistencia" title="Tu mapa de calor" color="#FF6E5C" />
-        <HeatMap />
-      </Card>
+      <section className="grid lg:grid-cols-2 gap-4 lg:items-start">
+        <Card>
+          <SectionTitle eyebrow="Consistencia" title="Tu mapa de calor" color="#FF6E5C" />
+          <HeatMap />
+        </Card>
 
-      <Card className="!p-4">
-        <WeekGrid onSelect={(w, d) => setSel({ week: w, dow: d })} highlight={today} />
-      </Card>
+        <Card className="!p-4">
+          <WeekGrid onSelect={(w, d) => setSel({ week: w, dow: d })} highlight={today} />
+        </Card>
+      </section>
 
       <section className="grid sm:grid-cols-3 gap-3">
         {[1, 2, 3].map((p) => {

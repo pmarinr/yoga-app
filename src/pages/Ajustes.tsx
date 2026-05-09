@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { clearAll, exportBackup, importBackup } from '../lib/backup'
 import { useStartDate } from '../hooks/useStartDate'
 import { useNotifications } from '../hooks/useNotifications'
@@ -8,6 +8,21 @@ import { QrShare } from '../components/QrShare'
 import { QrScan } from '../components/QrScan'
 import { Card, SectionTitle } from '../components/Card'
 
+const DAY_MS = 86400000
+
+function computeEnd(start: string, weeks: number): string {
+  const d = new Date(start + 'T00:00:00')
+  d.setDate(d.getDate() + weeks * 7 - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+function weeksFromEnd(start: string, end: string): number {
+  const d0 = new Date(start + 'T00:00:00').getTime()
+  const d1 = new Date(end + 'T00:00:00').getTime()
+  const days = Math.round((d1 - d0) / DAY_MS) + 1
+  return Math.max(1, Math.min(52, Math.ceil(days / 7)))
+}
+
 export function AjustesPage() {
   const { startDate, setStartDate } = useStartDate()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -16,7 +31,46 @@ export function AjustesPage() {
   const { config, setConfig, requestPermission, supported, triggersSupported, permission } =
     useNotifications()
   const { theme, setTheme } = useTheme()
-  const { goals, setGoals, endDate, setEndDate, setWeeks } = useGoals(startDate)
+  const { goals, setGoals } = useGoals(startDate)
+
+  // Borrador local del plan (no se aplica hasta pulsar "Actualizar")
+  const [draft, setDraft] = useState({
+    startKg: goals.startKg,
+    targetKg: goals.targetKg,
+    weeks: goals.weeks,
+    startDate,
+  })
+
+  // Re-sincroniza el borrador cuando cambian los persistidos (p.ej. tras importar)
+  useEffect(() => {
+    setDraft({
+      startKg: goals.startKg,
+      targetKg: goals.targetKg,
+      weeks: goals.weeks,
+      startDate,
+    })
+  }, [goals.startKg, goals.targetKg, goals.weeks, startDate])
+
+  const draftEnd = computeEnd(draft.startDate, draft.weeks)
+  const isDirty =
+    draft.startKg !== goals.startKg ||
+    draft.targetKg !== goals.targetKg ||
+    draft.weeks !== goals.weeks ||
+    draft.startDate !== startDate
+
+  const apply = () => {
+    if (draft.startDate !== startDate) setStartDate(draft.startDate)
+    setGoals({ startKg: draft.startKg, targetKg: draft.targetKg, weeks: draft.weeks })
+  }
+
+  const discard = () => {
+    setDraft({
+      startKg: goals.startKg,
+      targetKg: goals.targetKg,
+      weeks: goals.weeks,
+      startDate,
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -46,20 +100,18 @@ export function AjustesPage() {
       </Card>
 
       <Card>
-        <SectionTitle eyebrow="Plan" title="Fecha de inicio" color="#FF6E5C" />
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2 text-sm"
+        <SectionTitle
+          eyebrow="Meta"
+          title="Plan y objetivo"
+          color="#FF9F0A"
+          right={
+            isDirty ? (
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-racha/15 text-racha">
+                Cambios sin guardar
+              </span>
+            ) : null
+          }
         />
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-          Determina qué semana se muestra como "hoy".
-        </p>
-      </Card>
-
-      <Card>
-        <SectionTitle eyebrow="Meta" title="Tu objetivo" color="#FF9F0A" />
         <div className="grid grid-cols-2 gap-3">
           <label className="text-sm">
             <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Peso inicial (kg)</div>
@@ -67,10 +119,10 @@ export function AjustesPage() {
               type="number"
               step="0.1"
               inputMode="decimal"
-              value={goals.startKg}
+              value={draft.startKg}
               onChange={(e) => {
                 const n = parseFloat(e.target.value.replace(',', '.'))
-                if (isFinite(n) && n > 0) setGoals({ ...goals, startKg: n })
+                if (isFinite(n) && n > 0) setDraft({ ...draft, startKg: n })
               }}
               className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
             />
@@ -81,10 +133,21 @@ export function AjustesPage() {
               type="number"
               step="0.1"
               inputMode="decimal"
-              value={goals.targetKg}
+              value={draft.targetKg}
               onChange={(e) => {
                 const n = parseFloat(e.target.value.replace(',', '.'))
-                if (isFinite(n) && n > 0) setGoals({ ...goals, targetKg: n })
+                if (isFinite(n) && n > 0) setDraft({ ...draft, targetKg: n })
+              }}
+              className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
+            />
+          </label>
+          <label className="text-sm">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Fecha de inicio</div>
+            <input
+              type="date"
+              value={draft.startDate}
+              onChange={(e) => {
+                if (e.target.value) setDraft({ ...draft, startDate: e.target.value })
               }}
               className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
             />
@@ -95,26 +158,52 @@ export function AjustesPage() {
               type="number"
               min={1}
               max={52}
-              value={goals.weeks}
-              onChange={(e) => setWeeks(Number(e.target.value))}
+              value={draft.weeks}
+              onChange={(e) => {
+                const n = Math.max(1, Math.min(52, Math.round(Number(e.target.value) || 1)))
+                setDraft({ ...draft, weeks: n })
+              }}
               className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
             />
           </label>
-          <label className="text-sm">
+          <label className="text-sm col-span-2">
             <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Fecha límite</div>
             <input
               type="date"
-              value={endDate ?? ''}
+              value={draftEnd}
               onChange={(e) => {
-                if (e.target.value) setEndDate(e.target.value, startDate)
+                if (!e.target.value) return
+                const w = weeksFromEnd(draft.startDate, e.target.value)
+                setDraft({ ...draft, weeks: w })
               }}
               className="w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.1] dark:bg-[#1c1c1e] px-3 py-2"
             />
           </label>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
           Cambiar fecha límite recalcula las semanas y reorganiza las fases (1/3 cada una).
         </p>
+        <div className="mt-4 flex items-center gap-2 justify-end">
+          {isDirty && (
+            <button
+              onClick={discard}
+              className="px-4 py-2 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-sm font-semibold active:scale-95 transition"
+            >
+              Descartar
+            </button>
+          )}
+          <button
+            onClick={apply}
+            disabled={!isDirty}
+            className={`px-5 py-2 rounded-full text-white text-sm font-semibold active:scale-95 transition ${
+              isDirty
+                ? 'bg-racha hover:opacity-90 shadow-glow'
+                : 'bg-black/[0.1] dark:bg-white/[0.1] text-slate-400 dark:text-slate-500 cursor-not-allowed'
+            }`}
+          >
+            Actualizar
+          </button>
+        </div>
       </Card>
 
       <Card>
