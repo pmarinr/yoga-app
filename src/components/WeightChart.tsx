@@ -17,6 +17,16 @@ interface Props {
   data: WeightEntry[]
 }
 
+interface Row {
+  t: number
+  date: string
+  kg: number | null
+  trend: number | null
+}
+
+const formatTick = (t: number) =>
+  new Date(t).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+
 export function WeightChart({ data }: Props) {
   const { isDark } = useTheme()
   const { startKg: START_KG, targetKg: TARGET_KG } = useWeights()
@@ -32,10 +42,18 @@ export function WeightChart({ data }: Props) {
   }
 
   const forecast = forecastTarget(data, TARGET_KG)
-  type Row = { date: string; kg: number | null; trend: number | null }
   const series: Row[] = forecast
     ? forecast.series
-    : data.map((d) => ({ date: d.date, kg: d.kg, trend: null }))
+    : data.map((d) => ({
+        t: new Date(d.date + 'T00:00:00').getTime(),
+        date: d.date,
+        kg: d.kg,
+        trend: null,
+      }))
+
+  // Dominio temporal: del primer registro al último punto (real o proyectado)
+  const tMin = series[0].t
+  const tMax = series[series.length - 1].t
 
   const yValues = [
     ...data.map((d) => d.kg),
@@ -51,7 +69,15 @@ export function WeightChart({ data }: Props) {
       <ResponsiveContainer>
         <LineChart data={series} margin={{ left: -10, right: 16, top: 16, bottom: 0 }}>
           <CartesianGrid stroke={grid} strokeDasharray="3 3" />
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: text }} stroke={grid} />
+          <XAxis
+            type="number"
+            dataKey="t"
+            domain={[tMin, tMax]}
+            scale="time"
+            tickFormatter={formatTick}
+            tick={{ fontSize: 11, fill: text }}
+            stroke={grid}
+          />
           <YAxis domain={[yMin, yMax]} tick={{ fontSize: 11, fill: text }} stroke={grid} />
           <Tooltip
             contentStyle={{
@@ -61,6 +87,7 @@ export function WeightChart({ data }: Props) {
               color: isDark ? '#e2e8f0' : '#0f172a',
               fontSize: 12,
             }}
+            labelFormatter={(t) => formatTick(Number(t))}
             formatter={(value, name) => {
               if (value == null) return ['—', name as string]
               return [`${value} kg`, name === 'kg' ? 'Real' : 'Tendencia']
@@ -98,9 +125,9 @@ export function WeightChart({ data }: Props) {
             connectNulls={false}
             isAnimationActive
           />
-          {forecast?.eta && (
+          {forecast?.etaT && (
             <ReferenceDot
-              x={forecast.eta}
+              x={forecast.etaT}
               y={TARGET_KG}
               r={6}
               fill="#AF52DE"

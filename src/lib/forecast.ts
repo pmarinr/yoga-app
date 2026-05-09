@@ -3,7 +3,8 @@ export interface Forecast {
   intercept: number          // kg en el día 0 (primera fecha)
   kgPerWeek: number
   eta: string | null         // ISO YYYY-MM-DD donde la línea cruza el objetivo
-  series: Array<{ date: string; kg: number | null; trend: number }>
+  etaT: number | null        // mismo en timestamp ms
+  series: Array<{ t: number; date: string; kg: number | null; trend: number }>
 }
 
 const DAY_MS = 86400000
@@ -45,12 +46,13 @@ export function forecastTarget(
     }
   }
 
-  // Construir series: puntos reales + extrapolación
-  const series: Array<{ date: string; kg: number | null; trend: number }> = []
+  // Construir series: puntos reales + 1 punto final con la proyección
+  // (con eje X temporal, no necesitamos puntos intermedios para que la línea sea recta)
+  const series: Forecast['series'] = []
 
-  // Datos reales
   pts.forEach((p, i) => {
     series.push({
+      t: t0 + p.x * DAY_MS,
       date: sorted[i].date,
       kg: p.y,
       trend: +(intercept + slope * p.x).toFixed(2),
@@ -60,34 +62,23 @@ export function forecastTarget(
   const lastReal = pts[pts.length - 1].x
   const projectionEnd = etaDay ?? lastReal + 30
 
-  // Añadir puntos cada 7 días desde el último real hasta el final
-  for (let d = lastReal + 7; d < projectionEnd; d += 7) {
-    series.push({
-      date: new Date(t0 + d * DAY_MS).toISOString().slice(0, 10),
-      kg: null,
-      trend: +(intercept + slope * d).toFixed(2),
-    })
-  }
-  // Punto final exacto
-  if (etaDay !== null) {
-    series.push({
-      date: eta!,
-      kg: null,
-      trend: target,
-    })
-  } else {
-    series.push({
-      date: new Date(t0 + projectionEnd * DAY_MS).toISOString().slice(0, 10),
-      kg: null,
-      trend: +(intercept + slope * projectionEnd).toFixed(2),
-    })
-  }
+  // Punto final de la proyección
+  series.push({
+    t: t0 + projectionEnd * DAY_MS,
+    date:
+      etaDay !== null
+        ? eta!
+        : new Date(t0 + projectionEnd * DAY_MS).toISOString().slice(0, 10),
+    kg: null,
+    trend: etaDay !== null ? target : +(intercept + slope * projectionEnd).toFixed(2),
+  })
 
   return {
     slope,
     intercept,
     kgPerWeek: +(slope * 7).toFixed(2),
     eta,
+    etaT: eta ? new Date(eta + 'T00:00:00').getTime() : null,
     series,
   }
 }
