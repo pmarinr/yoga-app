@@ -7,6 +7,7 @@ import { useGoals } from '../hooks/useGoals'
 import { QrShare } from '../components/QrShare'
 import { QrScan } from '../components/QrScan'
 import { Card, SectionTitle } from '../components/Card'
+import { SyncCard } from '../components/SyncCard'
 
 const DAY_MS = 86400000
 
@@ -206,26 +207,7 @@ export function AjustesPage() {
         </div>
       </Card>
 
-      <Card>
-        <SectionTitle eyebrow="Sincronizar" title="Entre dispositivos" color="#0A84FF" />
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-          Sin servidor: comparte tus datos por código QR.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setShowShare(true)}
-            className="px-4 py-2 rounded-full bg-peso hover:opacity-90 text-white text-sm font-semibold shadow-glow active:scale-95 transition"
-          >
-            📤 Compartir QR
-          </button>
-          <button
-            onClick={() => setShowScan(true)}
-            className="px-4 py-2 rounded-full bg-peso/15 text-peso text-sm font-semibold active:scale-95 transition"
-          >
-            📷 Importar QR
-          </button>
-        </div>
-      </Card>
+      <SyncCard onShowQr={() => setShowShare(true)} onScanQr={() => setShowScan(true)} />
 
       <Card>
         <SectionTitle eyebrow="Recordatorio" title="Notificación diaria" color="#FF9F0A" />
